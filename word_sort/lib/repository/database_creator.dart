@@ -14,23 +14,27 @@ class DatabaseCreator {
   static const isDeleted = 'isDeleted';
 
   static void databaseLog(String functionName, String sql,
-      [List<Map<String, dynamic>> selectQueryResult, int insertAndUpdateQueryResult]){
+      [List<Map<String, dynamic>> selectQueryResult, int insertAndUpdateQueryResult, List<dynamic> params]) {
     print(functionName);
     print(sql);
-    if(selectQueryResult != null){
+    if (params != null) {
+      print(params);
+    }
+    if (selectQueryResult != null) {
       print(selectQueryResult);
-    } else if (insertAndUpdateQueryResult != null){
+    } else if (insertAndUpdateQueryResult != null) {
       print(insertAndUpdateQueryResult);
     }
   }
 
   Future<void> createWordTable(Database db) async {
-    final wordSql = '''CREATE TABLE $wordTable(
-    $id INTEGER PRIMARY KEY,
-    $word TEXT,
-    $description TEXT,
-    $level INTEGER,
-    $isDeleted BIT NOT NULL
+    final wordSql = '''CREATE TABLE $wordTable
+    (
+      $id INTEGER PRIMARY KEY,
+      $word TEXT,
+      $description TEXT,
+      $level INTEGER,
+      $isDeleted BIT NOT NULL
     )''';
 
     await db.execute(wordSql);
@@ -45,6 +49,7 @@ class DatabaseCreator {
     }else{
       await Directory(dirname(path)).create(recursive: true);
     }
+    return path;
   }
 
   Future<void> initDatabase() async {

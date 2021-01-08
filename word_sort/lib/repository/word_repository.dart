@@ -16,16 +16,24 @@ class WordRepository{
   }
 
   static Future<Word> getWord(int id) async {
-    final sql = '''SELECT * FROM ${DatabaseCreator.wordTable}
-    WHERE ${DatabaseCreator.id} == $id''';
-    final data = await db.rawQuery(sql);
+    // final sql = '''SELECT * FROM ${DatabaseCreator.wordTable}
+    // WHERE ${DatabaseCreator.id} == $id''';
+    // final data = await db.rawQuery(sql);
 
-    final word = Word.fromJson(data[0]);
-    return word;
+    // final word = Word.fromJson(data[0]);
+    // return word;
+    final sql = '''SELECT * FROM ${DatabaseCreator.wordTable}
+    WHERE ${DatabaseCreator.id} = ?''';
+
+    List<dynamic> params = [id];
+    final data = await db.rawQuery(sql, params);
+
+    final todo = Word.fromJson(data.first);
+    return todo;
   }
 
   static Future<Word> addWord(Word word) async {
-    final sql = '''INSERT * FROM ${DatabaseCreator.wordTable}
+    final sql = '''INSERT INTO ${DatabaseCreator.wordTable}
     (
       ${DatabaseCreator.id},
       ${DatabaseCreator.word},
@@ -33,39 +41,44 @@ class WordRepository{
       ${DatabaseCreator.level},
       ${DatabaseCreator.isDeleted}
     )
-    VALUES
-    (
-      ${word.id},
-      "${word.word}",
-      "${word.description}",
-      ${word.level},
-      ${word.isDeleted ? 1 : 0}
-    )''';
+    VALUES (?,?,?,?,?)''';
+    List<dynamic> params = [word.id, word.word, word.description, word.level, word.isDeleted ? 1 : 0];
+    final result = await db.rawInsert(sql, params);
+    DatabaseCreator.databaseLog('Add word', sql, null, result, params);
 
-    final result = await db.rawInsert(sql);
-    DatabaseCreator.databaseLog('Add Word', sql, null, result);
   }
 
   static Future<Word> deleteWord(Word word) async {
-    final sql = '''UPDATE * FROM ${DatabaseCreator.wordTable}
+    // final sql = '''UPDATE * FROM ${DatabaseCreator.wordTable}
+    // SET ${DatabaseCreator.isDeleted} = 1
+    // WHERE ${DatabaseCreator.id} == ${word.id}
+    // ''';
+    final sql = '''UPDATE ${DatabaseCreator.wordTable}
     SET ${DatabaseCreator.isDeleted} = 1
-    WHERE ${DatabaseCreator.id} == ${word.id}
+    WHERE ${DatabaseCreator.id} = ?
     ''';
+    List<dynamic> params = [word.id];
+    final result = await db.rawUpdate(sql, params);
 
-    final result = await db.rawUpdate(sql);
+    DatabaseCreator.databaseLog('Delete word', sql, null, result, params);
 
-    DatabaseCreator.databaseLog('Delete word', sql, null, result);
   }
 
   static Future<Word> updateWord(Word word) async {
+    // final sql = '''UPDATE ${DatabaseCreator.wordTable}
+    // SET ${DatabaseCreator.word} = "${word.word}"
+    // WHERE ${DatabaseCreator.id} == ${word.id}
+    // ''';
+
     final sql = '''UPDATE ${DatabaseCreator.wordTable}
-    SET ${DatabaseCreator.word} = "${word.word}"
-    WHERE ${DatabaseCreator.id} == ${word.id}
+    SET ${DatabaseCreator.word} = ?
+    WHERE ${DatabaseCreator.id} = ?
     ''';
 
-    final result = await db.rawUpdate(sql);
+    List<dynamic> params = [word.word, word.id];
+    final result = await db.rawUpdate(sql, params);
 
-    DatabaseCreator.databaseLog('Update word', sql, null, result);
+    DatabaseCreator.databaseLog('Update word', sql, null, result, params);
   }
 
   static Future<int> wordCount() async {
@@ -73,7 +86,8 @@ class WordRepository{
       ('''SELECT COUNT(*) FROM ${DatabaseCreator.wordTable}''');
 
     int count = data[0].values.elementAt(0);
-    return count;
+    int idForNewItem = count++;
+    return idForNewItem;
   }
 
 }

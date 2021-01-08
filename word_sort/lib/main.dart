@@ -38,6 +38,7 @@ class _WordSortState extends State<WordSort> {
   final _formKey = GlobalKey<FormState>();
   Future<List<Word>> future;
   String actualWord;
+  String description;
   int id;
 
   @override
@@ -112,7 +113,7 @@ class _WordSortState extends State<WordSort> {
     return TextFormField(
       decoration: InputDecoration(
         border: InputBorder.none,
-        hintText: 'name',
+        hintText: 'word',
         fillColor: Colors.grey[300],
         filled: true,
       ),
@@ -130,7 +131,7 @@ class _WordSortState extends State<WordSort> {
       _formKey.currentState.save();
       int count = await WordRepository.wordCount();
       // final word = Word(count, word, randomWord(), false);
-      final word = Word(count, actualWord, "Hello world!", 17,  false);
+      final word = Word(count, actualWord, randomWord(), 17,  false);
       await WordRepository.addWord(word);
       setState(() {
         id = word.id;
@@ -144,7 +145,7 @@ class _WordSortState extends State<WordSort> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('sqfLite CRUD'),
+        title: Text('WordSort'),
       ),
       body: ListView(
         padding: EdgeInsets.all(8),
